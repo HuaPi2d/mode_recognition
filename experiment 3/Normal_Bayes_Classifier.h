@@ -16,7 +16,6 @@
 #include <algorithm>
 #include <opencv2/opencv.hpp>
 
-using namespace cv;
 using namespace std;
 //Bayes¸ÅÂÊÔ¤²â
 void bayesClassify(double traindata[], double testdata[], int classNum, int trainNum, int testNum, int featureNum, double* P);

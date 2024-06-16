@@ -46,10 +46,10 @@ void BP_Init(double traindata[], int trainLabel[], int classNum, int trainNum, i
 		b_out[i] = (2.0*(double)rand() / RAND_MAX) - 1;
 
 	//网络参数学习率初始化
-	rate_w_in2hide = 0.1;  //权值学习率（输入层--隐含层)  
-	rate_w_hide2out = 0.1; //权值学习率 (隐含层--输出层)  
-	rate_b_hide = 0.1; //隐含层阀值学习率  
-	rate_b_out = 0.1; //输出层阀值学习率 
+	rate_w_in2hide = 0.3;  //权值学习率（输入层--隐含层)  
+	rate_w_hide2out = 0.3; //权值学习率 (隐含层--输出层)  
+	rate_b_hide = 0.3; //隐含层阀值学习率  
+	rate_b_out = 0.3; //输出层阀值学习率 
 }
 
 
@@ -301,11 +301,13 @@ void BP_Classify(double traindata[], int trainLabel[], double testdata[], int cl
 	printf("开始训练...");
 	int round = 0;//统计训练轮数
 	double error;//训练误差
-	while (round < 1000) {//共训练1000轮
+
+	while (round < 5000) {//共训练1000轮
 		error = train(input_X, output_Y, classNum, trainNum, w_in2hide, w_hide2out, b_hide, b_out, rate_w_in2hide, rate_w_hide2out, rate_b_hide, rate_b_out);
 		round++;
 		printf("第%d轮训练误差：%10f\n", round, error);
 	}
+
 	printf("训练结束");
 
 	save_Model(w_in2hide, w_hide2out, b_hide, b_out);//保存网络参数,测试训练集分类准确率的时候要把这部分屏蔽

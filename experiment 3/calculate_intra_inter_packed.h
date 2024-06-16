@@ -1,0 +1,1 @@
+void justify(const double* featureData, const int* labelArray);

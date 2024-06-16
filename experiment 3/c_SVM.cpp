@@ -1,7 +1,7 @@
 #include "c_SVM.h"
 #define feature 16 //特征数，共生矩阵是16个
 //SVM训练,svm为需要优化的SVM，traindata为训练数据，label为标签，minC为C的最小范围, maxC为C的最大范围, stepC为步长
-Ptr<SVM> getBestC_svm(Ptr<SVM> svm, double traindata[], int label[], int classNum, int trainNum, int featureNum, float minC, float maxC, float stepC)
+cv::Ptr<SVM> getBestC_svm(cv::Ptr<SVM> svm, double traindata[], int label[], int classNum, int trainNum, int featureNum, float minC, float maxC, float stepC)
 {
 	//构建训练集和验证集，输入的训练数据每个类别有16个样本，其中取12个构建训练集、4个构建验证集
 	float traindata_2D[20 * 12][feature];//训练集12张图
@@ -22,16 +22,16 @@ Ptr<SVM> getBestC_svm(Ptr<SVM> svm, double traindata[], int label[], int classNu
 			}
 		}
 	}
-	//将训练集数据和标签转为Mat类型
-	Mat trainDataMat(classNum*(trainNum-4), featureNum, CV_32FC1, traindata_2D);
-	Mat trainLabelMat(classNum*(trainNum-4), 1, CV_32SC1, trainLabel);
+	//将训练集数据和标签转为cv::Mat类型
+	cv::Mat trainDataMat(classNum*(trainNum-4), featureNum, CV_32FC1, traindata_2D);
+	cv::Mat trainLabelMat(classNum*(trainNum-4), 1, CV_32SC1, trainLabel);
 
 	//遍历参数C,根据验证集判断最优参数C
 	cout << "开始优化..." << endl;
-	Ptr<SVM> bestSVM;//存放最优SVM
+	cv::Ptr<SVM> bestSVM;//存放最优SVM
 	int correctCount = 0, tmpCorrectCount;//存放统计的验证正确的个数
 	for (double C = minC; C <= maxC; C = C + stepC) {
-		Ptr<SVM> tmpSVM;//存放临时SVM
+		cv::Ptr<SVM> tmpSVM;//存放临时SVM
 		tmpSVM = SVM::create();
 		//根据输入的SVM，设置临时SVM的参数
 		tmpSVM->setType(svm->getType());
@@ -41,11 +41,11 @@ Ptr<SVM> getBestC_svm(Ptr<SVM> svm, double traindata[], int label[], int classNu
 		tmpSVM->setC(C);
 		int times = 1000;//设置迭代次数
 		double error = 0.0001;//设置精度
-		tmpSVM->setTermCriteria(TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, times, error));//设置训练终止条件，满足迭代次数和精度是终止
+		tmpSVM->setTermCriteria(cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, times, error));//设置训练终止条件，满足迭代次数和精度是终止
 		tmpSVM->train(trainDataMat, ROW_SAMPLE, trainLabelMat);//训练SVM
 		tmpCorrectCount = 0;
 		for (int i = 0; i < classNum*(trainNum - 12); i++) {
-			Mat validateDataMat(1, featureNum, CV_32FC1, validatedata_2D[i]);
+			cv::Mat validateDataMat(1, featureNum, CV_32FC1, validatedata_2D[i]);
 			int result = tmpSVM->predict(validateDataMat);
 			if (result == validateLabel[i])
 				tmpCorrectCount++;
@@ -62,9 +62,9 @@ Ptr<SVM> getBestC_svm(Ptr<SVM> svm, double traindata[], int label[], int classNu
 }
 
 //预测，svm为训练好的SVM，input是测试数据，output为每一类的预测结果
-void SVM_predict(Ptr<SVM> svm, float input[], int classNum, int featureNum, int output[])
+void SVM_predict(cv::Ptr<SVM> svm, float input[], int classNum, int featureNum, int output[])
 {
-	Mat testMat(1, featureNum, CV_32FC1, input);//将input转换为Mat类型
+	cv::Mat testMat(1, featureNum, CV_32FC1, input);//将input转换为Mat类型
 	int result = svm->predict(testMat);//预测input，结果在result，得到类别号
 	for (int i = 0; i < classNum; i++) {
 		if (i == result - 1)//因为数组是从0开始
@@ -75,15 +75,15 @@ void SVM_predict(Ptr<SVM> svm, float input[], int classNum, int featureNum, int 
 }
 
 //保存SVM模型
-void save_svm(Ptr<SVM> svm)//保存支持向量
+void save_svm(cv::Ptr<SVM> svm)//保存支持向量
 {
 	svm->save("svm.xml");
 }
 
 //载入SVM模型
-Ptr<SVM> load_svm()
+cv::Ptr<SVM> load_svm()
 {
-	Ptr<SVM> svm;
+	cv::Ptr<SVM> svm;
 	svm = StatModel::load<SVM>("svm.xml");//载入已经训练好的SVM分类器
 	return svm;
 }
@@ -91,7 +91,7 @@ Ptr<SVM> load_svm()
 void SVM_Classify(double traindata[], int trainLabel[], double testdata[], int classNum, int trainNum, int testNum, int featureNum, double P[][20])
 {
 	//SVM初始化
-	Ptr<SVM> svm;
+	cv::Ptr<SVM> svm;
 	svm = SVM::create();
 	svm->setType(SVM::C_SVC);//设置类型为C类支持向量分类机，允许用异常值惩罚因子C进行不完全分类
 	svm->setKernel(SVM::RBF);//设置核类型为径向基核函数RBF，线性核 SVM::LINEAR，还可以有其他的核

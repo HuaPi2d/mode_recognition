@@ -3,15 +3,15 @@
 /*
 *@函数名： conv2
 *@功能：   卷积运算
-*@参数：   const Mat &img    原图像
-const Mat ikernel 卷积核
+*@参数：   const cv::Mat &img    原图像
+const cv::Mat ikernel 卷积核
 convtype type     卷积类型
-*@返回值： Mat       矩阵卷积后的结果
+*@返回值： cv::Mat       矩阵卷积后的结果
 */
-Mat conv2(const Mat &img, const Mat ikernel)
+cv::Mat conv2(const cv::Mat &img, const cv::Mat ikernel)
 {
-	Mat dst(img.rows, img.cols, CV_32F);
-	Mat kernel;
+	cv::Mat dst(img.rows, img.cols, CV_32F);
+	cv::Mat kernel;
 	flip(ikernel, kernel, -1);//将卷积核沿x,y轴翻转
 	filter2D(img, dst, img.depth(), kernel);
 	return dst;
@@ -21,7 +21,7 @@ Mat conv2(const Mat &img, const Mat ikernel)
 *@函数名： MakeAllGaborKernal
 *@功能：   生成所有Gabor核
 */
-void getAllGaborKernal(int GaborNum, int U, int V, Mat kel_GR[], Mat kel_GI[])
+void getAllGaborKernal(int GaborNum, int U, int V, cv::Mat kel_GR[], cv::Mat kel_GI[])
 {
 	int n = 0;
 	int kernel_w = 17;
@@ -43,11 +43,11 @@ void getAllGaborKernal(int GaborNum, int U, int V, Mat kel_GR[], Mat kel_GI[])
 int ke_w            核函数的宽度
 int u               Gabor的尺度
 int v               Gabor的方向
-Mat &GaborReal      Gabor的实部
-Mat &GaborImg       Gabor的虚部
-*@返回值： Mat              返回的Gabor特征
+cv::Mat &GaborReal      Gabor的实部
+cv::Mat &GaborImg       Gabor的虚部
+*@返回值： cv::Mat              返回的Gabor特征
 */
-void makeGaborKernal(int ke_h, int ke_w, int u, int v, Mat &GaborReal, Mat &GaborImg)
+void makeGaborKernal(int ke_h, int ke_w, int u, int v, cv::Mat &GaborReal, cv::Mat &GaborImg)
 {
 	int HalfH = ke_h / 2;
 	int HalfW = ke_w / 2;
@@ -83,19 +83,19 @@ void makeGaborKernal(int ke_h, int ke_w, int u, int v, Mat &GaborReal, Mat &Gabo
 /*
 *@函数名： calculate_Feature
 *@功能：   获取固定核函数的Gabor均值与方差二维特征
-*@参数：   Mat &src                原图---彩色图像
-Mat kel_GR[Gabor_num]   固定核函数的实部
-Mat kel_GI[Gabor_num]   固定核函数的虚部
+*@参数：   cv::Mat &src                原图---彩色图像
+cv::Mat kel_GR[Gabor_num]   固定核函数的实部
+cv::Mat kel_GI[Gabor_num]   固定核函数的虚部
 double* feature         特征值
 */
-void calculate_Feature(Mat &src, Mat kel_GR[], Mat kel_GI[], int GaborNum, double feature[])
+void calculate_Feature(cv::Mat &src, cv::Mat kel_GR[], cv::Mat kel_GI[], int GaborNum, double feature[])
 {
 	vector<float> featureTmp;
 	for (int i = 0;i<GaborNum;i++)
 	{
-		Mat feat_real_part(src.rows, src.cols, CV_32F);
-		Mat feat_img_part(src.rows, src.cols, CV_32F);
-		Mat feat_mode_part(src.rows, src.cols, CV_32F);
+		cv::Mat feat_real_part(src.rows, src.cols, CV_32F);
+		cv::Mat feat_img_part(src.rows, src.cols, CV_32F);
+		cv::Mat feat_mode_part(src.rows, src.cols, CV_32F);
 
 		feat_real_part = conv2(src, kel_GR[i]);
 		feat_img_part = conv2(src, kel_GI[i]);
@@ -105,8 +105,8 @@ void calculate_Feature(Mat &src, Mat kel_GR[], Mat kel_GI[], int GaborNum, doubl
 		feat_mode_part.convertTo(feat_mode_part, CV_32F);
 
 		sqrt(feat_mode_part, feat_mode_part);
-		Mat mean;
-		Mat stddev;
+		cv::Mat mean;
+		cv::Mat stddev;
 		meanStdDev(feat_mode_part, mean, stddev);
 
 		feature[i * 2] = mean.at<double>(0, 0);
